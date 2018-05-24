@@ -1,0 +1,40 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.zzuzl.dao.UserDao">
+    <insert id="addUser" parameterType="cn.zzuzl.domain.User">
+        insert into `user`(
+        username,
+        password,
+        name
+        ) values(
+        #{username},
+        #{password},
+        #{name}
+        )
+    </insert>
+
+    <update id="updateUser">
+        update `user`
+        set name=#{name}
+        where id=#{id}
+    </update>
+
+    <select id="selectUser" resultType="cn.zzuzl.domain.User">
+        select * from `user`
+        <if test="username != null">
+            where username=#{username}
+        </if>
+    </select>
+
+    <select id="getById" resultType="cn.zzuzl.domain.User">
+        select * from `user`
+        where id=#{id}
+    </select>
+
+    <delete id="deleteUser">
+        delete from `user`
+        where id=#{id}
+    </delete>
+</mapper>
