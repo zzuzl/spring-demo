@@ -1,13 +1,14 @@
 package cn.zzuzl.netty;
 
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.EventLoopGroup;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.DelimiterBasedFrameDecoder;
+import io.netty.handler.codec.string.StringDecoder;
 
 import java.net.InetSocketAddress;
 
@@ -21,20 +22,27 @@ public class EchoServer {
     public void start() throws Exception {
         ServerBootstrap bootstrap = new ServerBootstrap();
         EventLoopGroup loopGroup = new NioEventLoopGroup();
+        EventLoopGroup workerGroup = new NioEventLoopGroup();
 
-        bootstrap.group(loopGroup);
-        bootstrap.channel(NioServerSocketChannel.class);
-        bootstrap.localAddress(new InetSocketAddress(port));
-        bootstrap.childHandler(new ChannelInitializer<SocketChannel>() {
+        bootstrap.group(loopGroup, workerGroup)
+                .channel(NioServerSocketChannel.class)
+                .option(ChannelOption.SO_BACKLOG, 1024)
+                .childHandler(new ChannelInitializer<SocketChannel>() {
             @Override
             protected void initChannel(SocketChannel socketChannel) throws Exception {
+                ByteBuf delimiter = Unpooled.copiedBuffer("$_".getBytes());
+                socketChannel.pipeline().addLast(new DelimiterBasedFrameDecoder(1024, delimiter));
+                socketChannel.pipeline().addLast(new StringDecoder());
                 socketChannel.pipeline().addLast(new EchoServerHandler());
             }
         });
 
-        ChannelFuture future = bootstrap.bind().sync();
+        ChannelFuture future = bootstrap.bind(port).sync();
         System.out.println(getClass().getName() + " bind success:" + port);
         future.channel().closeFuture().sync();
-        loopGroup.shutdownGracefully().sync();
+
+        // 关闭资源
+        loopGroup.shutdownGracefully();
+        workerGroup.shutdownGracefully();
     }
 }

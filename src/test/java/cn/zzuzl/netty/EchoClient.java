@@ -1,6 +1,8 @@
 package cn.zzuzl.netty;
 
 import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelInitializer;
@@ -8,6 +10,8 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.DelimiterBasedFrameDecoder;
+import io.netty.handler.codec.string.StringDecoder;
 
 import java.net.InetSocketAddress;
 
@@ -27,28 +31,22 @@ public class EchoClient {
     public void start() throws Exception {
         Bootstrap bootstrap = new Bootstrap();
         EventLoopGroup loopGroup = new NioEventLoopGroup();
-        bootstrap.group(loopGroup);
-        bootstrap.channel(NioSocketChannel.class);
-        bootstrap.remoteAddress(new InetSocketAddress(host, port));
-        bootstrap.handler(new ChannelInitializer<SocketChannel>() {
+
+        bootstrap.group(loopGroup)
+                .channel(NioSocketChannel.class)
+                .handler(new ChannelInitializer<SocketChannel>() {
             @Override
             protected void initChannel(SocketChannel socketChannel) throws Exception {
+                ByteBuf delimiter = Unpooled.copiedBuffer("$_".getBytes());
+                // socketChannel.pipeline().addLast(new DelimiterBasedFrameDecoder(1024, delimiter));
+                // socketChannel.pipeline().addLast(new StringDecoder());
                 socketChannel.pipeline().addLast(new EchoClientHandler());
             }
         });
-        ChannelFuture sync = bootstrap.connect().sync();
-        sync.addListener(new ChannelFutureListener() {
-            @Override
-            public void operationComplete(ChannelFuture channelFuture) throws Exception {
-                if (channelFuture.isSuccess()) {
-                    System.out.println("client connected");
-                } else {
-                    System.out.println("server conntect failed");
-                    channelFuture.cause().printStackTrace();
-                }
-            }
-        });
-        sync.channel().closeFuture().sync();
-        loopGroup.shutdownGracefully().sync();
+        ChannelFuture future = bootstrap.connect(host, port).sync();
+        future.channel().closeFuture().sync();
+
+        // 关闭资源
+        loopGroup.shutdownGracefully();
     }
 }

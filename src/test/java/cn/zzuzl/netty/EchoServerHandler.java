@@ -1,5 +1,6 @@
 package cn.zzuzl.netty;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
@@ -7,14 +8,18 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
 public class EchoServerHandler extends ChannelInboundHandlerAdapter {
+    private int counter = 0;
+
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        System.out.println("server received data :" + msg);
-        ctx.writeAndFlush(msg);
+        String body = (String) msg;
+        System.out.println(++counter + ",server received data :" + body);
+        body += "$_";
+        ByteBuf echo = Unpooled.copiedBuffer(body.getBytes());
+        ctx.writeAndFlush(echo);
     }
 
     public void channelReadComplete(ChannelHandlerContext ctx) {
-        ctx.writeAndFlush(Unpooled.EMPTY_BUFFER) //flush掉所有写回的数据
-                .addListener(ChannelFutureListener.CLOSE); //当flush完成后关闭channel
+        ctx.flush();
     }
 
     public void exceptionCaught(ChannelHandlerContext ctx,Throwable cause) {

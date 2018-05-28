@@ -10,6 +10,8 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.CharsetUtil;
 
 public class EchoClientHandler extends SimpleChannelInboundHandler<ByteBuf> {
+    private int counter = 0;
+    private static final String ECHO = "welcome to netty.$_";
 
     /**
      * 连接到服务器时调用
@@ -18,7 +20,9 @@ public class EchoClientHandler extends SimpleChannelInboundHandler<ByteBuf> {
      */
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        ctx.writeAndFlush(Unpooled.copiedBuffer("Netty rocks!", CharsetUtil.UTF_8));
+        for (int i=0;i<10;i++){
+            ctx.writeAndFlush(Unpooled.copiedBuffer(ECHO, CharsetUtil.UTF_8));
+        }
     }
 
     /**
