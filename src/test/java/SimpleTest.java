@@ -9,6 +9,7 @@ import org.junit.Test;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by Administrator on 2017/9/9.
@@ -55,5 +56,12 @@ public class SimpleTest {
         Item item = new Item("122", "22311", new BigDecimal(1313));
         System.out.println(mapper.writeValueAsString(item));
         System.out.println(stopwatch.stop().elapsed(TimeUnit.MILLISECONDS));
+    }
+
+    @Test
+    public void testInt() {
+        Integer i = Integer.valueOf("1");
+        Integer j = 1;
+        System.out.println(i == j);
     }
 }
