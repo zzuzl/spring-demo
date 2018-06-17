@@ -18,7 +18,7 @@
     <!-- 调度业务 -->
     <bean id="jobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
         <property name="targetObject" ref="myJob" />
-        <property name="targetMethod" value="execute" />
+        <property name="targetMethod" value="sayHello" />
     </bean>
 
     <!-- 增加调用的触发器，触发时间 -->

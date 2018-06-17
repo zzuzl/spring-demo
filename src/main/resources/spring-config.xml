@@ -13,4 +13,6 @@
             </list>
         </property>
     </bean>
+
+    <bean class="cn.zzuzl.log.ChangeLogLevelProcessUnit"/>
 </beans>

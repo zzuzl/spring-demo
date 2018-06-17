@@ -7,7 +7,10 @@ import com.google.common.collect.Lists;
 import org.junit.Test;
 
 import java.math.BigDecimal;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
+import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -22,6 +25,11 @@ public class SimpleTest {
 
         ThreeTuple<Integer, String, Float> threeTuple = new ThreeTuple<Integer, String, Float>(twoTuple, 0.01f);
         System.out.println(threeTuple);
+
+        System.out.println(SimpleTest.class.getClassLoader());
+        System.out.println(SimpleTest.class.getClassLoader().getParent());
+
+        System.out.println(String.class.getClassLoader().getClass().getName());
     }
 
     @Test
@@ -52,10 +60,8 @@ public class SimpleTest {
     @Test
     public void testJson() throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
-        Stopwatch stopwatch = Stopwatch.createStarted();
         Item item = new Item("122", "22311", new BigDecimal(1313));
         System.out.println(mapper.writeValueAsString(item));
-        System.out.println(stopwatch.stop().elapsed(TimeUnit.MILLISECONDS));
     }
 
     @Test
@@ -63,5 +69,20 @@ public class SimpleTest {
         Integer i = Integer.valueOf("1");
         Integer j = 1;
         System.out.println(i == j);
+    }
+
+    @Test
+    public void testString() {
+        StringBuffer sb = new StringBuffer();
+        sb.append("ab");
+
+        TreeMap<String, Date> treeMap = new TreeMap<String, Date>(new Comparator<String>() {
+            @Override
+            public int compare(String o1, String o2) {
+                return o1.compareTo(o2);
+            }
+        });
+
+        treeMap.put("1", new Date());
     }
 }
