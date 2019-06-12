@@ -9,12 +9,13 @@ public class LoginResponseHandler extends SimpleChannelInboundHandler<LoginRespo
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, LoginResponsePacket loginResponsePacket) throws Exception {
         System.out.println(new Date() + ":客户端登陆成功");
-        LoginUtil.markAsLogin(channelHandlerContext.channel());
+        Session session = new Session();
+        SessionUtil.markAsLogin(channelHandlerContext.channel(), session);
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        System.out.println("客户端开始登陆");
+        /*System.out.println("客户端开始登陆");
         // 创建登录对象
         LoginRequestPacket loginRequestPacket = new LoginRequestPacket();
         loginRequestPacket.setUserId(1);
@@ -22,6 +23,6 @@ public class LoginResponseHandler extends SimpleChannelInboundHandler<LoginRespo
         loginRequestPacket.setPassword("pwd");
 
         // 写数据
-        ctx.channel().writeAndFlush(loginRequestPacket);
+        ctx.channel().writeAndFlush(loginRequestPacket);*/
     }
 }

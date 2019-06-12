@@ -10,6 +10,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
+import org.apache.zookeeper.Login;
 
 import java.util.Scanner;
 
@@ -54,21 +55,39 @@ public class NettyClient {
     }
 
     private static void startConsoleThread(Channel channel) {
+        Scanner scanner = new Scanner(System.in);
         new Thread(new Runnable() {
             @Override
             public void run() {
                 while (!Thread.interrupted()) {
-                    if (LoginUtil.hasLogin(channel)) {
-                        System.out.println("输入消息发送到服务端");
-                        Scanner scanner = new Scanner(System.in);
+                    if (!SessionUtil.hasLogin(channel)) {
+                        System.out.println("输入用户名登陆");
                         String line = scanner.nextLine();
+                        LoginRequestPacket packet = new LoginRequestPacket();
+                        packet.setUsername(line);
+                        packet.setPassword("pwd");
+
+                        channel.writeAndFlush(packet);
+                        waitForLoginResponse();
+                    } else {
+                        Integer toUserId = scanner.nextInt();
+                        String message = scanner.next();
 
                         MessageRequestPacket packet = new MessageRequestPacket();
-                        packet.setMessage(line);
-                        channel.writeAndFlush(PacketCodeC.INSTANCE.encode(packet));
+                        packet.setToUserId(toUserId);
+                        packet.setMessage(message);
+                        channel.writeAndFlush(packet);
                     }
                 }
             }
         }).start();
+    }
+
+    private static void waitForLoginResponse() {
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+
+        }
     }
 }
