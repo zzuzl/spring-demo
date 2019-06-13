@@ -34,6 +34,7 @@ public class NettyClient {
                     public void initChannel(SocketChannel ch) {
                         ch.pipeline().addLast(new PacketDecoder());
                         ch.pipeline().addLast(new LoginResponseHandler());
+                        ch.pipeline().addLast(new CreateGroupResponseHandler());
                         ch.pipeline().addLast(new MessageResponseHandler());
                         ch.pipeline().addLast(new PacketEncoder());
                     }
@@ -55,28 +56,26 @@ public class NettyClient {
     }
 
     private static void startConsoleThread(Channel channel) {
+        LoginConsoleCommand loginConsoleCommand = new LoginConsoleCommand();
+        ConsoleCommandManager manager = new ConsoleCommandManager();
+
         Scanner scanner = new Scanner(System.in);
         new Thread(new Runnable() {
             @Override
             public void run() {
                 while (!Thread.interrupted()) {
                     if (!SessionUtil.hasLogin(channel)) {
-                        System.out.println("输入用户名登陆");
-                        String line = scanner.nextLine();
-                        LoginRequestPacket packet = new LoginRequestPacket();
-                        packet.setUsername(line);
-                        packet.setPassword("pwd");
-
-                        channel.writeAndFlush(packet);
+                        loginConsoleCommand.exec(scanner, channel);
                         waitForLoginResponse();
                     } else {
-                        Integer toUserId = scanner.nextInt();
+                        manager.exec(scanner, channel);
+                        /*Integer toUserId = scanner.nextInt();
                         String message = scanner.next();
 
                         MessageRequestPacket packet = new MessageRequestPacket();
                         packet.setToUserId(toUserId);
                         packet.setMessage(message);
-                        channel.writeAndFlush(packet);
+                        channel.writeAndFlush(packet);*/
                     }
                 }
             }
